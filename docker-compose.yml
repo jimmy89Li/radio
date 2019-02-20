@@ -1,5 +1,7 @@
+# docker compose version
 version: "3.1"
 
+# define the network
 networks:
   src: 
     driver: bridge
@@ -8,19 +10,22 @@ networks:
       config:
         - subnet: 172.10.2.0/23
 
+# start the services
 services:
+  # database service
   mysql:
     build: ./db
     volumes:
       - ./data:/docker-entrypoint-initdb.d
     command: --default-authentication-plugin=mysql_native_password
     ports:
-      - 3308:3306
+      - 3306:3306
     networks:
       src:
         ipv4_address: 172.10.3.2
     env_file:
       - ./development.env
+  # web service
   www:
     build: ./www
     volumes: 
