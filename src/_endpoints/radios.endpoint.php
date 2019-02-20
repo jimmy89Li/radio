@@ -60,10 +60,7 @@ switch (strtolower($method))
                 {
                   // Location not allowed !
                   $output = array("status"=>"403 FORBIDDEN","msg"=>"Location ".$radioLocation." not allowed!");
-                  // echo 'Location: ' . $radioLocation . ' NOT allowed!';
                 }
-                // print_r($allowedLocations);
-                // die;
               }
               else
               {
@@ -169,10 +166,6 @@ switch (strtolower($method))
           {
             $output = array("status"=>"404 NOT FOUND", "msg"=>"Location not available!");
           }
-          // while($row = $rs->fetch_assoc())
-          // {
-          //   $result = $row;
-          // }
         }
         else
         {
@@ -196,7 +189,6 @@ switch (strtolower($method))
           $result = "Target not found!";
         }
         $output = array("status"=>"200 OK", "msg"=>$result);
-        // $output = array("status"=>1, "msg"=>"GET all info for id:".$id);
       }
     }
     else
