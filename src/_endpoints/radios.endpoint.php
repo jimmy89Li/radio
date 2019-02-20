@@ -1,15 +1,108 @@
 <?php
-//<description>
-//This endpoint contains radio methods.
-//</description>
+/* This endpoint contains radio methods. */
 
-if($_SERVER["REQUEST_METHOD"]==='POST') { $method='POST'; }
+// print_r($location);
+// die;
 
-//Methods for endpoint:
+// Methods for endpoint:
 switch (strtolower($method))
 {
 
-  //GET method
+  // POST method
+  case "post":
+
+  // print_r($id);
+  // die;
+  
+    // Check if the ID is given
+    if(isset($id) && !empty($id))
+    {
+      // Check if the ID is in the correct format (numeric)
+      if(is_numeric($id))
+      {
+
+        // Check if there are parameters sent
+        if($parameters)
+        {
+          // Check if the location is set
+          if($location)
+          {
+            // Location set - check for location parameter
+            $output = array("status"=>"200 OK","msg"=>$location);
+          }
+          else
+          {
+            // Location is not given - check for alias and allowed_locations parameters
+            $err = [];
+            if(sizeof($parameters)!=2)
+            {
+              $err[] = "Parameters amount incorrect!";
+            }
+            else
+            {
+              if(!array_key_exists("alias",$parameters)) { $err[] = "alias"; } else { $radioAlias = $parameters["alias"]; }
+              if(!array_key_exists("allowed_locations",$parameters)) { $err[] = "allowed_locations"; } else { $radioAllowerLocations = "\"" . implode("\",\"",$parameters["allowed_locations"]) . "\""; }
+            }
+
+            // If no errors - proceed on setting the radio details
+            if(empty($err))
+            {
+              // Check if radio already exists
+              $checkSQL = "SELECT * FROM radios WHERE id='{$id}'";
+              $checkID = $mysqli->query($checkSQL);
+              if($checkID->num_rows)
+              {
+                // Product already exists - update required
+                $sql = "UPDATE radios SET alias='{$radioAlias}' , allowed_locations='{$radioAllowerLocations}' WHERE id='{$id}'";
+                $updateRadio = $mysqli->query($sql);
+                if($updateRadio)
+                {
+                  $output = array("status"=>"200 OK","msg"=>array("alias"=>$radioAlias,"allowed_locations"=>$radioAllowerLocations));
+                }
+                else
+                {
+                  $output = array("status"=>-1,"msg"=>"Radio update failed!");
+                }
+              }
+              else
+              {
+                // Product does not exists - creating required
+                $sql = "INSERT INTO radios SET id='{$id}', alias='{$radioAlias}' , allowed_locations='{$radioAllowerLocations}' ";
+                $createRadio = $mysqli->query($sql);
+                if($createRadio)
+                {
+                  $output = array("status"=>"200 OK","msg"=>array("alias"=>$radioAlias,"allowed_locations"=>$radioAllowerLocations));
+                }
+                else
+                {
+                  $output = array("status"=>-1,"msg"=>"Radio creation failed!");
+                }
+              }
+            }
+            else
+            {
+              $output = array("status"=>-1,"msg"=>"Invalid parameters: " . implode(", ",$err) . " !");
+            }
+          }
+        }
+        else
+        {
+          $output = array("status"=>-1,"msg"=>"Invalid parameters!");
+        }
+
+      }
+      else
+      {
+        $output = array("status"=>-1,"msg"=>"Invalid ID format!");
+      }
+    }
+    else
+    {
+      $output = array("status"=>-1, "msg"=>"Invalid target! Please specify a radio ID!");
+    }
+    break;
+
+  // GET method
   case "get":
   
     if(isset($id) && !empty($id))
@@ -30,7 +123,7 @@ switch (strtolower($method))
         {
           $result = "Target not found!";
         }
-        $output = array("status"=>1, "msg"=>$result);
+        $output = array("status"=>"200 OK", "msg"=>$result);
       }
       else
       {
@@ -48,7 +141,7 @@ switch (strtolower($method))
         {
           $result = "Target not found!";
         }
-        $output = array("status"=>1, "msg"=>$result);
+        $output = array("status"=>"200 OK", "msg"=>$result);
         // $output = array("status"=>1, "msg"=>"GET all info for id:".$id);
       }
     }
@@ -58,13 +151,7 @@ switch (strtolower($method))
     }
     break;
 
-  //POST method
-  case "post":
-
-    $output = array("status"=>1, "msg"=>"POST");
-    break;
-
-  //Default method
+  // Default method
   default:
     $output = array("status"=>-1, "msg"=>"Unknown method: ".$method);
 
