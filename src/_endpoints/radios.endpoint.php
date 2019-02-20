@@ -154,26 +154,35 @@ switch (strtolower($method))
     {
       if(isset($location)&&!empty($location))
       {
-        $result = [];
+        $result = '';
         $sql = "SELECT location FROM {$endpoint} WHERE id='".$id."'";
         $rs = $mysqli->query($sql);
         if($rs->num_rows)
         {
-          while($row = $rs->fetch_assoc())
+          // Check if location exists
+          $result = $rs->fetch_assoc()["location"];
+          if($result!==null)
           {
-            $result[] = $row;
+            $output = array("status"=>"200 OK", "msg"=>"Location: ".$result);
           }
+          else
+          {
+            $output = array("status"=>"404 NOT FOUND", "msg"=>"Location not available!");
+          }
+          // while($row = $rs->fetch_assoc())
+          // {
+          //   $result = $row;
+          // }
         }
         else
         {
-          $result = "Target not found!";
+          $output = array("status"=>"200 OK", "msg"=>"Target not found!");
         }
-        $output = array("status"=>"200 OK", "msg"=>$result);
       }
       else
       {
         $result = [];
-        $sql = "SELECT * FROM {$endpoint} WHERE id='".$id."'";
+        $sql = "SELECT alias,location FROM {$endpoint} WHERE id='".$id."'";
         $rs = $mysqli->query($sql);
         if($rs->num_rows)
         {
