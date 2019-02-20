@@ -1,18 +1,12 @@
 <?php
 /* This endpoint contains radio methods. */
 
-// print_r($location);
-// die;
-
 // Methods for endpoint:
 switch (strtolower($method))
 {
 
   // POST method
   case "post":
-
-  // print_r($id);
-  // die;
   
     // Check if the ID is given
     if(isset($id) && !empty($id))
@@ -28,7 +22,58 @@ switch (strtolower($method))
           if($location)
           {
             // Location set - check for location parameter
-            $output = array("status"=>"200 OK","msg"=>$location);
+            $err = [];
+            if(sizeof($parameters)!=1)
+            {
+              $err = "Parameters amount incorrect!";
+            }
+            else
+            {
+              if(!array_key_exists("location",$parameters)) { $err[] = "location"; } else { $radioLocation = $parameters["location"]; }
+            }
+
+            // If no errors - proceed on setting the radio location
+            if(empty($err))
+            {
+              // Check if radio ID exists
+              $getSQL = "SELECT * FROM radios WHERE id='{$id}'";
+              $getRadio = $mysqli->query($getSQL);
+              if($getRadio->num_rows)
+              {
+                // Check if location is allowed
+                $allowedLocations = explode(",",$getRadio->fetch_assoc()["allowed_locations"]);
+                if(in_array("\"".$radioLocation."\"",$allowedLocations))
+                {
+                  // Location allowed - set radio location
+                  $setLocSQL = "UPDATE radios SET location='{$radioLocation}' WHERE id='{$id}'";
+                  $setLoc = $mysqli->query($setLocSQL);
+                  if($setLoc)
+                  {
+                    $output = array("status"=>"200 OK","msg"=>"Location set: " . $radioLocation);
+                  }
+                  else
+                  {
+                    $output = array("status"=>-1,"msg"=>"Failed to set location!");
+                  }
+                }
+                else
+                {
+                  // Location not allowed !
+                  $output = array("status"=>"403 FORBIDDEN","msg"=>"Location ".$radioLocation." not allowed!");
+                  // echo 'Location: ' . $radioLocation . ' NOT allowed!';
+                }
+                // print_r($allowedLocations);
+                // die;
+              }
+              else
+              {
+                $output = array("status"=>-1,"msg"=>"Radio ID: " . $id . " does not exist!");
+              }
+            }
+            else
+            {
+              $output = array("status"=>-1,"msg"=>$err);
+            }
           }
           else
           {
