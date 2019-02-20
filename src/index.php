@@ -17,8 +17,10 @@ array_shift($request);
 
 $method = (count($request)>0) ? strtolower($request[0]) : '';
 $endpoint = (count($request)>1) ? strtolower($request[1]) : '';
-$id = (count($request)>2) ? strtolower($request[2]) : '';
-$location = (count($request)>3) ? strtolower($request[3]) : '';
+$id = (count($request)>2 && is_numeric($request[2])) ? $request[2] : '';
+if(strpos($id,"?")) { $id = explode("?",$id)[0]; }
+$location = (count($request)>3 && strpos($request[3],"location")!==false) ? strtolower($request[3]) : '';
+if(strpos($location,"?")!==false) { $location = explode("?",$location)[0]; }
 $parms = $_SERVER["QUERY_STRING"] ? $_SERVER["QUERY_STRING"] : '';
 $parameters = (file_get_contents("php://input")) ? json_decode(file_get_contents("php://input"),true) : array();
 
