@@ -15,12 +15,12 @@ header('Content-Type: application/json');
 $request = explode("/",$_SERVER["REQUEST_URI"]);
 array_shift($request);
 
-$method = (count($request)>0) ? strtolower($request[0]) : '';
-$endpoint = (count($request)>1) ? strtolower($request[1]) : '';
-$id = (count($request)>2 && is_numeric($request[2])) ? $request[2] : '';
-if(strpos($id,"?")) { $id = explode("?",$id)[0]; }
-$location = (count($request)>3 && strpos($request[3],"location")!==false) ? strtolower($request[3]) : '';
-if(strpos($location,"?")!==false) { $location = explode("?",$location)[0]; }
+$method = $_SERVER["REQUEST_METHOD"];
+$endpoint = (count($request)>0) ? strtolower($request[0]) : '';
+$id = (count($request)>1) ? $request[1] : '';
+// if(strpos($id,"?")!==false) { $id = explode("?",$id)[0]; }
+$location = (count($request)>2 && strpos($request[2],"location")!==false) ? strtolower($request[2]) : '';
+// if(strpos($location,"?")!==false) { $location = explode("?",$location)[0]; }
 $parms = $_SERVER["QUERY_STRING"] ? $_SERVER["QUERY_STRING"] : '';
 $parameters = (file_get_contents("php://input")) ? json_decode(file_get_contents("php://input"),true) : array();
 
